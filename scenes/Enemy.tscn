@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scripts/Enemy.cs" type="Script" id=1]
+
+[node name="Enemy" type="KinematicBody2D" groups=[
+"enemy",
+]]
+position = Vector2( 0, 1 )
+script = ExtResource( 1 )
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+polygon = PoolVector2Array( -27.6164, 42.2542, 0.459335, -0.654068, 28.0054, 41.1947 )
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PoolVector2Array( 0.682571, 1.67229, -25.038, 40.8431, 24.7514, 39.4273 )

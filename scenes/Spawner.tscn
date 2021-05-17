@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/Enemy.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/Bullet.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scripts/Spawner.cs" type="Script" id=4]
+
+[node name="Spawner" type="PathFollow2D"]
+position = Vector2( 1024, 339.929 )
+rotation = 3.14159
+offset = 1365.88
+script = ExtResource( 4 )
+enemyScene = ExtResource( 1 )
+bulletScene = ExtResource( 3 )
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.001
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
