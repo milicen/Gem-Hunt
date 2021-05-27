@@ -5,16 +5,7 @@ using System.Collections.Generic;
 public class Main : Node
 {
 
-    // export array of enemy types
-    // [Export] Godot.Collections.Array<PackedScene> enemyTypes = new Godot.Collections.Array<PackedScene>();
-
-    // in ready function :
-    // loop through every enemy types
-    // for each type, make 10 instance of enemy
-    // add each of them into a specified array (queue)
-
-    // make a dictionary that will contain all queues
-    // public Dictionary<string, Queue<Enemy>> enemyPool = new Dictionary<string, Queue<Enemy>>();
+    
 
     [Export] PackedScene enemyScene;
 
@@ -78,22 +69,6 @@ public class Main : Node
 
         interactionLabel.Text = interaction + (level+1).ToString();
 
-        // make enemy pool
-        // for(int i = 0; i < enemyTypes.Count; i++) {
-        //     Queue<Enemy> enemyQueue = new Queue<Enemy>();
-        //     for(int size = 0; size < 10; size++) {
-        //         var enemy = (Enemy) enemyTypes[i].Instance();
-        //         // set position
-        //         // set rotation
-        //         enemy.Name = "enemy" + (i+1).ToString() + (size+1).ToString();
-        //         enemyQueue.Enqueue(enemy);
-        //         AddChild(enemy);           
-        //     }
-        //     enemyPool.Add("enemy-type-1", enemyQueue);
-            
-        // }
-
-
     }
 
     public override void _Process(float delta)
@@ -117,20 +92,6 @@ public class Main : Node
                 }
             }
         }
-
-        // if(enemies.Count < maxEnemySpawn) {
-        //     for(int i = 0; i < maxEnemySpawn; i++) {
-        //         var enemy = enemyPool["enemy-type-1"].Dequeue();
-        //         enemy.Visible = true;
-        //         enemy.Position = new Vector2((float) GD.RandRange(112f, 912f), (float) GD.RandRange(100f, 500f));
-        //         enemy.Rotation = (float) GD.RandRange(0, 2 * Mathf.Pi);
-
-        //         if(level > 2) {
-        //             enemy.SetSpeed((float) GD.RandRange(100f, 300f));
-        //         }
-
-        //     }
-        // }
 
         if(isOnPlay) {
             minutes = Mathf.Floor(waveTimer.TimeLeft / 60);
@@ -167,7 +128,6 @@ public class Main : Node
             GetNode<Spawner>("SpawnerPath/Spawner").StopTimer();
             waveTimer.Stop();
             delayTimer.Stop();
-            // SetProcess(false);
         }
 
         // as wave progress, bullet spawn rate up and bullet speed down / up, enemy spawn up, enemy movement rate up
@@ -184,7 +144,7 @@ public class Main : Node
             points = 0;
             waveTimer.WaitTime = waveWaitTime;
             delayTimer.WaitTime = delayWaitTime;
-            interactionLabel.Text = interaction + (level + 1);
+            waveCountLabel.Text = wave + (level + 1);
 
             delayTimer.Start();
         }

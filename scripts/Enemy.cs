@@ -15,11 +15,14 @@ public class Enemy : KinematicBody2D
     public Timer timer;
     public bool isJustSpawned = true;
 
-    public override void _Ready()
-    {
+    public override void _Ready() {
+        timer = GetNode<Timer>("Timer");
         hpBar = GetNode<TextureProgress>("TextureProgress");
         body2D = GetNode<CollisionPolygon2D>("CollisionPolygon2D"); 
+    }
 
+    public void Init(Vector2 position)
+    {
         hp = maxHp;
 
         hpBar.MaxValue = maxHp;
@@ -30,13 +33,14 @@ public class Enemy : KinematicBody2D
 
         // body2D.GlobalRotation = velocity.Angle();
 
-        GetNode<RayCast2D>("RayCast2D").CastTo = velocity.Normalized() * 50;
+        // GetNode<RayCast2D>("RayCast2D").CastTo = velocity.Normalized() * 50;
 
-        timer = new Timer();
+        Position = position;
+
+        isJustSpawned = true;
+
         timer.WaitTime = 1.4f;
-        AddChild(timer);
         timer.Start();
-
     }
 
     public override async void  _PhysicsProcess(float delta)

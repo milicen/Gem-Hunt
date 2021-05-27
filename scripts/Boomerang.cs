@@ -49,7 +49,6 @@ public class Boomerang : Area2D
                 GlobalPosition += direction.Normalized() * boomerangSpeed * delta;
 
                 if(currentDistance <= 3f) {
-                    // GlobalPosition = player.GlobalPosition;
                     isFlying = false;
                     clickCount = 0;
                 }
