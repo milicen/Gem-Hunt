@@ -3,10 +3,11 @@ using System;
 
 public class Boomerang : Area2D
 {
+    [Export] PackedScene gemScene;
+
     Player player;
     Vector2 direction;
     Vector2 startPoint;
-    float distance;
     float maxDistance = 250f;
     float setDistance;
     float boomerangSpeed = 400f;
@@ -17,6 +18,7 @@ public class Boomerang : Area2D
     public override void _Ready()
     {
         player = GetNode<Player>("/root/Main/Player");
+        player.Connect("PlayerDie", this, "_on_PlayerDie");
     }
 
     public override void _Process(float delta)
@@ -72,10 +74,26 @@ public class Boomerang : Area2D
         
     }
 
-    void _on_Boomerang_body_entered(Node body) {
+    void _on_Boomerang_body_entered(Enemy body) {
         if(body.IsInGroup("enemy")) {
-            body.QueueFree();
+            // body.QueueFree();
+            // var enemyBody = (Enemy) body.GetParent();
+            body.TakeDamage();
+            SpawnGem(body.GlobalPosition);
         }
+    }
+
+    void _on_PlayerDie() {
+        Hide();
+    }
+
+    void SpawnGem(Vector2 spawnPos) {
+        // instance a gem
+        var gem = (Area2D) gemScene.Instance();
+        // set position to current enemy position
+        gem.Position = spawnPos;
+        // add as Main's child
+        GetParent().AddChild(gem);
     }
 
 }

@@ -1,15 +1,37 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://scripts/Enemy.cs" type="Script" id=1]
+[ext_resource path="res://assets/health-bar.png" type="Texture" id=2]
 
 [node name="Enemy" type="KinematicBody2D" groups=[
 "enemy",
 ]]
-position = Vector2( 0, 1 )
 script = ExtResource( 1 )
+maxHp = 3
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-polygon = PoolVector2Array( -27.6164, 42.2542, 0.459335, -0.654068, 28.0054, 41.1947 )
+[node name="TextureProgress" type="TextureProgress" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -25.0
+margin_top = -35.0
+margin_right = 25.0
+margin_bottom = -32.0
+value = 50.0
+texture_under = ExtResource( 2 )
+texture_progress = ExtResource( 2 )
+tint_under = Color( 0.211765, 0.211765, 0.211765, 1 )
+tint_progress = Color( 0.878431, 0.160784, 0.0784314, 1 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PoolVector2Array( 0.682571, 1.67229, -25.038, 40.8431, 24.7514, 39.4273 )
+polygon = PoolVector2Array( 0, -12, -12, 8, 12, 8 )
+
+[node name="Polygon2D" type="Polygon2D" parent="CollisionPolygon2D"]
+offset = Vector2( 0, -12 )
+polygon = PoolVector2Array( -12, 20, 0, 9.53674e-07, 12, 20 )
+
+[node name="RayCast2D" type="RayCast2D" parent="."]
+enabled = true

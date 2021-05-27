@@ -3,6 +3,8 @@ using System;
 
 public class Player : KinematicBody2D
 {
+    [Signal] delegate void PlayerDie();
+
     Vector2 velocity = Vector2.Zero;
     [Export] float movementSpeed = 20000f;
 
@@ -12,8 +14,7 @@ public class Player : KinematicBody2D
     }
 
     public override void _Process(float delta) {
-        GetNode<CollisionShape2D>("CollisionShape2D").LookAt(GetGlobalMousePosition());
-        
+        GetNode<CollisionShape2D>("CollisionShape2D").LookAt(GetGlobalMousePosition());    
     }
 
     public override void _PhysicsProcess(float delta)
@@ -28,5 +29,21 @@ public class Player : KinematicBody2D
             ) * movementSpeed;
 
         velocity = MoveAndSlide(velocity * delta);
+    }
+
+    public void Die() {
+        Hide();
+        EmitSignal("PlayerDie");
+    }
+
+    public void CenterPosition(Vector2 position) {
+        Position = position;
+    }
+
+    void _on_Area2D_area_entered(Area2D area) {
+        if(area.IsInGroup("gem")) {
+            GetNode<Main>("/root/Main").SetPoint();
+            area.QueueFree();
+        }
     }
 }

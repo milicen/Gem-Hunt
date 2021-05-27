@@ -22,4 +22,14 @@ public class Bullet : Area2D
     {
         Position += direction * speed * delta;   
     }
+
+    void _on_Bullet_body_entered(Player body) {
+        if(body.GetType() == typeof(Player)) {
+            body.Die();
+        }
+    }
+
+    void _on_VisibilityNotifier2D_viewport_exited(Viewport vp) {
+        QueueFree();
+    }
 }

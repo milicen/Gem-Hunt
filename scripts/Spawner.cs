@@ -4,7 +4,6 @@ using System;
 public class Spawner : PathFollow2D
 {
     Timer timer;
-    [Export] PackedScene enemyScene;
     [Export] PackedScene bulletScene;
 
     [Export] float minTimer = .2f;

@@ -4,6 +4,18 @@ using System.Collections.Generic;
 
 public class Main : Node
 {
+
+    // export array of enemy types
+    // [Export] Godot.Collections.Array<PackedScene> enemyTypes = new Godot.Collections.Array<PackedScene>();
+
+    // in ready function :
+    // loop through every enemy types
+    // for each type, make 10 instance of enemy
+    // add each of them into a specified array (queue)
+
+    // make a dictionary that will contain all queues
+    // public Dictionary<string, Queue<Enemy>> enemyPool = new Dictionary<string, Queue<Enemy>>();
+
     [Export] PackedScene enemyScene;
 
     Godot.Collections.Array<Enemy> enemies = new Godot.Collections.Array<Enemy>();
@@ -12,6 +24,7 @@ public class Main : Node
 
     const int startLevel = 0;
     int level;
+    int points;
 
     // level 1 : bullet hell
     // level 2 : bullet hell + static enemy
@@ -22,8 +35,11 @@ public class Main : Node
     float waveWaitTime = 20f;
     float delayWaitTime = 5f;
 
+    Label pointsLabel;
+
     Label interactionLabel;
     string interaction = "Moving on to Wave ";
+    string retry = "Press R to retry";
 
     Label timerLabel;
     float minutes;
@@ -36,9 +52,13 @@ public class Main : Node
 
     bool isOnPlay = false;
 
+    Vector2 screenCenter;
+
     public override void _Ready()
     {
         GD.Randomize();
+
+        screenCenter = GetViewport().Size / 2;
 
         waveTimer = GetNode<Timer>("Timers/WaveTimer");
         delayTimer = GetNode<Timer>("Timers/DelayTimer");
@@ -47,6 +67,9 @@ public class Main : Node
 
         timerLabel = GetNode<Label>("HUD/TimerLabel");
         waveCountLabel = GetNode<Label>("HUD/WaveCountLabel");
+        pointsLabel = GetNode<Label>("HUD/PointsLabel");
+
+        pointsLabel.Text = "Gems " + points;
 
         level = startLevel;
         waveTimer.WaitTime = waveWaitTime;
@@ -54,11 +77,28 @@ public class Main : Node
         delayTimer.Start();
 
         interactionLabel.Text = interaction + (level+1).ToString();
+
+        // make enemy pool
+        // for(int i = 0; i < enemyTypes.Count; i++) {
+        //     Queue<Enemy> enemyQueue = new Queue<Enemy>();
+        //     for(int size = 0; size < 10; size++) {
+        //         var enemy = (Enemy) enemyTypes[i].Instance();
+        //         // set position
+        //         // set rotation
+        //         enemy.Name = "enemy" + (i+1).ToString() + (size+1).ToString();
+        //         enemyQueue.Enqueue(enemy);
+        //         AddChild(enemy);           
+        //     }
+        //     enemyPool.Add("enemy-type-1", enemyQueue);
+            
+        // }
+
+
     }
 
     public override void _Process(float delta)
     {
-        if(level > 1) {
+        if(level >= 1) {
             // instance 3 enemies
             if(enemies.Count < maxEnemySpawn) {
                 for (int i = 0; i < maxEnemySpawn; i++) {
@@ -67,16 +107,30 @@ public class Main : Node
                     // set enemies position to random position
                     enemy.Position = new Vector2((float) GD.RandRange(112f, 912f), (float) GD.RandRange(100f, 500f));
 
-                    if(level > 2) {
+                    // if(level > 2) {
                         enemy.SetSpeed((float) GD.RandRange(100f, 300f));
-                    }
+                    // }
 
                     enemies.Add(enemy);
                     // add child to main
-                    GetNode<Main>("/root/Main").AddChild(enemy);
+                    AddChild(enemy);
                 }
             }
         }
+
+        // if(enemies.Count < maxEnemySpawn) {
+        //     for(int i = 0; i < maxEnemySpawn; i++) {
+        //         var enemy = enemyPool["enemy-type-1"].Dequeue();
+        //         enemy.Visible = true;
+        //         enemy.Position = new Vector2((float) GD.RandRange(112f, 912f), (float) GD.RandRange(100f, 500f));
+        //         enemy.Rotation = (float) GD.RandRange(0, 2 * Mathf.Pi);
+
+        //         if(level > 2) {
+        //             enemy.SetSpeed((float) GD.RandRange(100f, 300f));
+        //         }
+
+        //     }
+        // }
 
         if(isOnPlay) {
             minutes = Mathf.Floor(waveTimer.TimeLeft / 60);
@@ -101,21 +155,46 @@ public class Main : Node
             secondsString = seconds.ToString();
         }
 
+        pointsLabel.Text = "Gems " + points;
+
         timerLabel.Text = minuteString + " : " + secondsString;
+
+        if(!GetNode<Player>("Player").Visible) {
+            isOnPlay = false;
+            ClearLevel();
+            interactionLabel.Text = retry;
+            interactionLabel.PercentVisible = 1;
+            GetNode<Spawner>("SpawnerPath/Spawner").StopTimer();
+            waveTimer.Stop();
+            delayTimer.Stop();
+            // SetProcess(false);
+        }
 
         // as wave progress, bullet spawn rate up and bullet speed down / up, enemy spawn up, enemy movement rate up
 
-        GD.Print("wavetimer: " + Mathf.Floor(waveTimer.TimeLeft));
-        GD.Print("delaytimer: " + Mathf.Floor(delayTimer.TimeLeft));
+    }
 
+    public override void _UnhandledInput(InputEvent @event) {
+        if(Input.IsActionJustPressed("restart")) {
+            // restart all variables and timer
+            GetNode<Player>("Player").Show();
+            GetNode<Player>("Player").CenterPosition(screenCenter);
+            GetNode<Boomerang>("Boomerang").Show();
+            level = 0;
+            points = 0;
+            waveTimer.WaitTime = waveWaitTime;
+            delayTimer.WaitTime = delayWaitTime;
+            interactionLabel.Text = interaction + (level + 1);
+
+            delayTimer.Start();
+        }
     }
 
     // on wavetimer timeout, clean enemy and bullets, start delaytimer
     void _on_WaveTimer_timeout() {
         isOnPlay = false;
 
-        GetTree().CallGroup("enemy", "queue_free");
-        GetTree().CallGroup("bullet", "queue_free");
+        ClearLevel();
 
         delayTimer.Start();
         GetNode<Spawner>("SpawnerPath/Spawner").StopTimer();
@@ -136,7 +215,7 @@ public class Main : Node
             maxEnemySpawn = level;
         }
         else {
-            maxEnemySpawn = 4;
+            maxEnemySpawn = 5;
         }
 
         interactionLabel.PercentVisible = 0;
@@ -147,5 +226,15 @@ public class Main : Node
 
     public int GetLevel() {
         return level;
+    }
+
+    public void SetPoint() {
+        points++;
+    }
+
+    void ClearLevel() {
+        GetTree().CallGroup("enemy", "queue_free");
+        GetTree().CallGroup("bullet", "queue_free");
+        GetTree().CallGroup("gem", "queue_free");
     }
 }

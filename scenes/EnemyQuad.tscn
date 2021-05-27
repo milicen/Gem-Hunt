@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/Enemy.tscn" type="PackedScene" id=1]
+
+[sub_resource type="CSharpScript" id=1]
+script/source = "using Godot;
+using System;
+
+public class Enemy : Node2D
+{
+    TextureProgress hpBar;
+    CollisionPolygon2D body2D;
+
+    Vector2 direction;
+    float speed = 0f;
+
+    int hp = 3;
+    [Export] int maxHp;
+
+    Timer timer;
+    bool isJustSpawned = true;
+
+    public override void _Ready()
+    {
+        hpBar = GetNode<TextureProgress>(\"TextureProgress\");
+        body2D = GetNode<CollisionPolygon2D>(\"CollisionPolygon2D\"); 
+
+        body2D.Rotation = (float) GD.RandRange(0, 2 * Mathf.Pi);
+
+        hpBar.MaxValue = maxHp;
+        hpBar.Value = hpBar.MaxValue;
+
+        var angle = body2D.Rotation;
+        direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+
+
+
+        timer = new Timer();
+        timer.WaitTime = 1.4f;
+        AddChild(timer);
+        timer.Start();
+    }
+
+    public override async void  _Process(float delta)
+    {
+        if(isJustSpawned) {
+            await ToSignal(timer, \"timeout\");
+            isJustSpawned = false;
+        }
+        else {
+            Position += speed * direction * delta;
+        }
+
+        if(hp <= 0) {
+            Die();
+        }
+    }
+
+    public void SetSpeed(float newSpeed) {
+        speed = newSpeed;
+    }
+
+    public void TakeDamage() {
+        hp--;
+        hpBar.Value = hp;
+    }
+
+    public void Die() {
+        QueueFree();
+    }
+}
+"
+
+[node name="EnemyQuad" instance=ExtResource( 1 )]
+script = SubResource( 1 )
+maxHp = 4
+
+[node name="CollisionPolygon2D" parent="." index="1"]
+polygon = PoolVector2Array( -12, -12, 12, -12, 12, 12, -12, 12 )
+
+[node name="Polygon2D" parent="CollisionPolygon2D" index="0"]
+polygon = PoolVector2Array( -12, 0, 12, 0, 12, 24, -12, 24 )
